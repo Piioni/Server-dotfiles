@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_ROOT="$REPO_ROOT/home/.config"
-USER_CONFIG_ROOT="$HOME/.config"
 APT_PACKAGES=(
   curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full
 )
@@ -42,6 +39,11 @@ install_apt_packages() {
 install_eza() {
   if has_command eza; then
     log "eza already installed"
+    return
+  fi
+
+  if ! has_command apt-get; then
+    log "apt-get not found; skipping eza installation"
     return
   fi
 
@@ -110,47 +112,13 @@ install_fisher() {
   fish -c 'contains -- "$HOME/.local/bin" $fish_user_paths; or set -Ua fish_user_paths "$HOME/.local/bin"' >/dev/null 2>&1 || true
 }
 
-backup_target_if_needed() {
-  local target="$1"
-  local source="$2"
-
-  if [ -L "$target" ] && [ "$(readlink -f "$target")" = "$(readlink -f "$source")" ]; then
-    return
-  fi
-
-  if [ -e "$target" ] || [ -L "$target" ]; then
-    local backup_path="${target}.backup.$(date +%Y%m%d%H%M%S)"
-    log "Backing up $target to $backup_path"
-    mv "$target" "$backup_path"
-  fi
-}
-
-link_config_dir() {
-  local name="$1"
-  local source="$CONFIG_ROOT/$name"
-  local target="$USER_CONFIG_ROOT/$name"
-
-  mkdir -p "$USER_CONFIG_ROOT"
-
-  if [ ! -d "$source" ]; then
-    log "Source config missing for $name; skipping"
-    return
-  fi
-
-  backup_target_if_needed "$target" "$source"
-  ln -sfn "$source" "$target"
-  log "Linked $target -> $source"
-}
-
 main() {
   install_apt_packages
   install_eza
   install_snap_package zellij
   install_snap_package yazi
   install_fisher
-  link_config_dir fish
-  link_config_dir yazi
-  link_config_dir zellij
+  log "Installation complete. Run ./link.sh to link repo-managed configs into ~/.config"
   log "Done"
 }
 
