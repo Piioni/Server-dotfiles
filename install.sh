@@ -3,7 +3,7 @@
 set -euo pipefail
 
 APT_PACKAGES=(
-  curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full
+  curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full kitty-terminfo
 )
 
 log() {
