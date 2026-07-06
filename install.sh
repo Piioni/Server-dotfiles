@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ZELLIJ_PLUGIN_DIR="/usr/local/share/zellij/plugins"
+ZJSTATUS_PLUGIN_NAME="zjstatus.wasm"
+
 APT_PACKAGES=(
   curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full kitty-terminfo
 )
@@ -12,6 +16,19 @@ log() {
 
 has_command() {
   command -v "$1" >/dev/null 2>&1
+}
+
+install_zjstatus_plugin() {
+  local plugin_source="$REPO_ROOT/home/.config/zellij/$ZJSTATUS_PLUGIN_NAME"
+
+  if [ ! -f "$plugin_source" ]; then
+    log "zjstatus plugin not found in repo; skipping global plugin install"
+    return
+  fi
+
+  log "Installing zjstatus plugin to $ZELLIJ_PLUGIN_DIR/$ZJSTATUS_PLUGIN_NAME"
+  sudo mkdir -p "$ZELLIJ_PLUGIN_DIR"
+  sudo install -m 0644 "$plugin_source" "$ZELLIJ_PLUGIN_DIR/$ZJSTATUS_PLUGIN_NAME"
 }
 
 install_apt_packages() {
@@ -118,6 +135,7 @@ main() {
   install_snap_package zellij
   install_snap_package yazi
   install_fisher
+  install_zjstatus_plugin
   log "Installation complete. Run ./link.sh to link repo-managed configs into ~/.config"
   log "Done"
 }
