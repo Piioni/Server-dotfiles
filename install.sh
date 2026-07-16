@@ -113,28 +113,22 @@ install_snap_package() {
   sudo snap install "$name" --classic
 }
 
-install_fisher() {
-  if ! has_command fish; then
-    log "fish not found; skipping fisher installation"
+install_starship() {
+  if has_command starship; then
+    log "starship already installed"
     return
   fi
 
-  if fish -c 'functions -q fisher' >/dev/null 2>&1; then
-    log "fisher already installed"
-  else
-    log "Installing fisher"
-    fish -c 'curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher'
-  fi
-
-  fish -c 'contains -- "$HOME/.local/bin" $fish_user_paths; or set -Ua fish_user_paths "$HOME/.local/bin"' >/dev/null 2>&1 || true
+  log "Installing starship"
+  curl -fsSL https://starship.rs/install.sh | sh -s -- -y
 }
 
 main() {
   install_apt_packages
   install_eza
+  install_starship
   install_snap_package zellij
   install_snap_package yazi
-  install_fisher
   install_zjstatus_plugin
   log "Installation complete. Run ./link.sh to link repo-managed configs into ~/.config"
   log "Done"

@@ -49,8 +49,29 @@ link_config_dir() {
   log "Linked $target -> $source"
 }
 
+link_config_file() {
+  local name="$1"
+  local source="$CONFIG_ROOT/$name"
+  local target="$USER_CONFIG_ROOT/$name"
+
+  mkdir -p "$USER_CONFIG_ROOT"
+
+  if [ ! -f "$source" ]; then
+    log "Source config missing for $name; skipping"
+    return
+  fi
+
+  if ! backup_target_if_needed "$target" "$source"; then
+    return
+  fi
+
+  ln -sfn "$source" "$target"
+  log "Linked $target -> $source"
+}
+
 main() {
   link_config_dir fish
+  link_config_file starship.toml
   link_config_dir yazi
   link_config_dir zellij
   log "Done"
