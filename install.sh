@@ -5,6 +5,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ZELLIJ_PLUGIN_DIR="/usr/local/share/zellij/plugins"
 ZJSTATUS_PLUGIN_NAME="zjstatus.wasm"
+APT_UPDATED=0
 
 APT_PACKAGES=(
   curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full kitty-terminfo
@@ -31,6 +32,15 @@ install_zjstatus_plugin() {
   sudo install -m 0644 "$plugin_source" "$ZELLIJ_PLUGIN_DIR/$ZJSTATUS_PLUGIN_NAME"
 }
 
+apt_update_once() {
+  local force_refresh="${1:-false}"
+
+  if [ "$force_refresh" = "true" ] || [ "$APT_UPDATED" -eq 0 ]; then
+    sudo apt-get update
+    APT_UPDATED=1
+  fi
+}
+
 install_apt_packages() {
   if ! has_command apt-get; then
     log "apt-get not found; skipping apt package installation"
@@ -48,7 +58,7 @@ install_apt_packages() {
   done
 
   if [ "${#available_packages[@]}" -gt 0 ]; then
-    sudo apt-get update
+    apt_update_once
     sudo apt-get install -y "${available_packages[@]}"
   fi
 }
@@ -65,7 +75,7 @@ install_eza() {
   fi
 
   if apt-cache show eza >/dev/null 2>&1; then
-    sudo apt-get update
+    apt_update_once
     sudo apt-get install -y eza
     return
   fi
@@ -94,7 +104,7 @@ install_eza() {
   sudo mkdir -p /etc/apt/preferences.d
   printf 'Package: *\nPin: origin deb.gierens.de\nPin-Priority: 1000\n' | sudo tee /etc/apt/preferences.d/gierens >/dev/null
   sudo chmod 644 /etc/apt/preferences.d/gierens
-  sudo apt-get update
+  apt_update_once true
   sudo apt-get install -y eza
 }
 
