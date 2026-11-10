@@ -19,7 +19,7 @@ usage() {
 Usage: ./link.sh [--dry-run|-n] [component ...]
 
 Components:
-  fish
+  nushell
   starship
   yazi
   zellij
@@ -28,7 +28,7 @@ EOF
 
 component_source_path() {
   case "$1" in
-    fish|yazi|zellij)
+    nushell|yazi|zellij)
       printf '%s/%s' "$CONFIG_ROOT" "$1"
       ;;
     starship)
@@ -42,7 +42,7 @@ component_source_path() {
 
 component_target_path() {
   case "$1" in
-    fish|yazi|zellij)
+    nushell|yazi|zellij)
       printf '%s/%s' "$USER_CONFIG_ROOT" "$1"
       ;;
     starship)
@@ -56,7 +56,7 @@ component_target_path() {
 
 component_kind() {
   case "$1" in
-    fish|yazi|zellij)
+    nushell|yazi|zellij)
       printf 'dir'
       ;;
     starship)
@@ -175,7 +175,7 @@ parse_args() {
         usage
         exit 0
         ;;
-      fish|starship|yazi|zellij)
+      nushell|starship|yazi|zellij)
         COMPONENTS+=("$1")
         ;;
       *)
@@ -188,7 +188,7 @@ parse_args() {
   done
 
   if [ "${#COMPONENTS[@]}" -eq 0 ]; then
-    COMPONENTS=(fish starship yazi zellij)
+    COMPONENTS=(nushell starship yazi zellij)
   fi
 }
 

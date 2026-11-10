@@ -8,7 +8,7 @@ ZJSTATUS_PLUGIN_NAME="zjstatus.wasm"
 APT_UPDATED=0
 
 APT_PACKAGES=(
-  curl git fish bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full kitty-terminfo
+  curl git bat file ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide imagemagick p7zip-full kitty-terminfo
 )
 
 log() {
@@ -133,10 +133,50 @@ install_starship() {
   curl -fsSL https://starship.rs/install.sh | sh -s -- -y
 }
 
+install_nushell() {
+  if has_command nu; then
+    log "nu already installed"
+    return
+  fi
+
+  local arch tag asset tmp
+  case "$(uname -m)" in
+    x86_64) arch="x86_64" ;;
+    aarch64|arm64) arch="aarch64" ;;
+    *)
+      log "Unsupported architecture for nu: $(uname -m)"
+      return 1
+      ;;
+  esac
+
+  tag="$(curl -fsSL https://api.github.com/repos/nushell/nushell/releases/latest | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')"
+  asset="nu-${tag}-${arch}-unknown-linux-musl"
+  tmp="$(mktemp -d)"
+
+  log "Installing nu $tag"
+  curl -fsSL "https://github.com/nushell/nushell/releases/download/${tag}/${asset}.tar.gz" | tar -xz -C "$tmp"
+  sudo install -m 0755 "$tmp/$asset/nu" /usr/local/bin/nu
+  rm -rf "$tmp"
+}
+
+# Nushell sources these generated files; they must exist before the first `nu` session.
+generate_nushell_integrations() {
+  if has_command zoxide; then
+    zoxide init --cmd j nushell >"$HOME/.zoxide.nu"
+  fi
+
+  if has_command starship; then
+    mkdir -p "$HOME/.local/share/nushell/vendor/autoload"
+    starship init nu >"$HOME/.local/share/nushell/vendor/autoload/starship.nu"
+  fi
+}
+
 main() {
   install_apt_packages
   install_eza
   install_starship
+  install_nushell
+  generate_nushell_integrations
   install_snap_package zellij
   install_snap_package yazi
   install_zjstatus_plugin
