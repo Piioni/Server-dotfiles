@@ -1,5 +1,5 @@
 default_layout "default"
-default_shell "/usr/bin/fish"
+default_shell "/usr/local/bin/nu"
 
 env {
     COLORTERM "truecolor"
@@ -33,7 +33,7 @@ keybinds clear-defaults=true {
         bind "Alt r" { SwitchToMode "renametab"; TabNameInput 0; }
 
         bind "Alt Shift f" {
-            Run "/usr/bin/fish" {
+            Run "/usr/local/bin/nu" {
                 floating true
             }
         }
