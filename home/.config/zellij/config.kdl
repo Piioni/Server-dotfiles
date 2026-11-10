@@ -249,4 +249,5 @@ keybinds clear-defaults=true {
 }
 
 default_mode "locked"
-copy_command "wl-copy"
+copy_clipboard "system"
+copy_on_select true
