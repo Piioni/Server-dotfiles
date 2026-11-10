@@ -59,7 +59,7 @@ install_apt_packages() {
 
   if [ "${#available_packages[@]}" -gt 0 ]; then
     apt_update_once
-    sudo apt-get install -y "${available_packages[@]}"
+    sudo apt-get install -y --no-upgrade "${available_packages[@]}"
   fi
 }
 
